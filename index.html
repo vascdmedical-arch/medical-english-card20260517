@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>診察英会話 暗記カード</title>
+  <meta name="theme-color" content="#0f766e" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif; background:linear-gradient(135deg,#f0fdfa,#eff6ff); color:#0f172a; min-height:100vh; }
+    .app-header { padding:24px clamp(16px,4vw,48px); display:flex; gap:16px; justify-content:space-between; align-items:flex-start; }
+    .eyebrow { letter-spacing:.12em; text-transform:uppercase; color:#0f766e; font-size:.76rem; font-weight:800; margin:0 0 4px; }
+    h1 { font-size:clamp(1.55rem,5vw,3rem); margin:0; letter-spacing:-.03em; }
+    .subtitle { max-width:840px; color:#475569; line-height:1.75; margin:.6rem 0 0; }
+    main { width:min(980px,100%); margin:auto; padding:0 16px 32px; }
+    .toolbar,.stats,.actions,.add-panel,.list-panel { background:rgba(255,255,255,.84); backdrop-filter:blur(12px); border:1px solid rgba(15,118,110,.16); box-shadow:0 12px 30px rgba(15,23,42,.07); border-radius:24px; padding:12px; margin:12px 0; }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; }
+    button,.file-label { border:0; border-radius:999px; padding:12px 16px; background:#0f766e; color:#fff; font-weight:800; cursor:pointer; box-shadow:0 8px 18px rgba(15,118,110,.22); font-size: 15px; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    .mode { background:#e2e8f0; color:#0f172a; box-shadow:none; }
+    .mode.active { background:#0f766e; color:white; }
+    .danger { background:#fee2e2; color:#b91c1c; }
+    .ghost { background:#fff; color:#0f766e; border:1px solid #99f6e4; }
+    .speak { background:#2563eb; box-shadow:0 8px 18px rgba(37,99,235,.22); }
+    .hidden { display:none; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center; }
+    .stats div { background:#f8fafc; border-radius:18px; padding:12px; }
+    .stats strong { font-size:1.55rem; }
+    .stats small { display:block; color:#64748b; margin-top:2px; }
+    .card-wrap { perspective:1200px; margin:18px 0; }
+    .flashcard { position:relative; min-height:340px; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
+    .flashcard.flipped { transform:rotateY(180deg); }
+    .face { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:28px; border-radius:32px; background:#fff; border:1px solid rgba(15,118,110,.18); box-shadow:0 24px 50px rgba(15,23,42,.12); backface-visibility:hidden; overflow:auto; }
+    .back { transform:rotateY(180deg); background:linear-gradient(135deg,#ffffff,#ecfeff); }
+    .label { align-self:flex-start; background:#ccfbf1; color:#0f766e; border-radius:999px; padding:6px 12px; font-size:.85rem; font-weight:900; }
+    #jaText,#enText { font-size:clamp(1.3rem,4.4vw,2.35rem); line-height:1.55; margin:24px 0; white-space:pre-wrap; width:100%; }
+    .hint { color:#94a3b8; margin:0; }
+    .actions { display:grid; grid-template-columns:1fr auto auto 1fr; gap:10px; align-items:center; }
+    .check { display:flex; align-items:center; justify-content:center; gap:8px; background:#f8fafc; border-radius:999px; padding:10px 12px; font-weight:800; color:#334155; min-height:44px; }
+    .check input { width:20px; height:20px; }
+    details summary { cursor:pointer; font-weight:900; padding:8px; }
+    .add-form { display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end; padding:12px; }
+    textarea,input[type=search] { width:100%; border:1px solid #cbd5e1; border-radius:16px; padding:12px; font:inherit; background:#fff; }
+    textarea { resize:vertical; }
+    label { font-weight:800; color:#334155; }
+    .data-tools { display:flex; gap:10px; flex-wrap:wrap; padding:0 12px 12px; }
+    .file-label input { display:none; }
+    .note { color:#64748b; line-height:1.7; padding:0 12px 12px; margin:0; }
+    .card-list { display:grid; gap:8px; max-height:420px; overflow:auto; padding-top:12px; }
+    .row { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; background:#f8fafc; border-radius:16px; padding:10px; }
+    .row p { margin:0; line-height:1.5; }
+    .row button { padding:8px 10px; background:#334155; }
+    .empty { color:#64748b; text-align:center; padding:28px; }
+    footer { text-align:center; color:#94a3b8; padding:24px; }
+    @media(max-width:720px) {
+      .app-header { display:block; padding-bottom:12px; }
+      .stats { grid-template-columns:repeat(2,1fr); }
+      .actions { grid-template-columns:1fr 1fr; }
+      .add-form { grid-template-columns:1fr; }
+      .flashcard { min-height:400px; }
+      .row { grid-template-columns:1fr; }
+      button,.file-label { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Japanese → English</p>
+      <h1>診察英会話 暗記カード</h1>
+      <p class="subtitle">日本語を見て英語を思い出す練習です。カードをタップすると英語が表示され、英語音声も再生できます。チェック状態と追加カードはこのブラウザに保存されます。</p>
+    </div>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="学習モード">
+      <button id="allMode" class="mode active" type="button">すべて</button>
+      <button id="retryMode" class="mode" type="button">再挑戦のみ</button>
+      <button id="shuffleBtn" class="mode" type="button">シャッフル</button>
+      <button id="resetBtn" class="mode danger" type="button">進捗リセット</button>
+    </section>
+    <section class="stats" aria-label="進捗">
+      <div><strong id="currentNo">1</strong><span>/</span><span id="totalNo">0</span><small>現在のカード</small></div>
+      <div><strong id="cardTotal">0</strong><small>登録カード</small></div>
+      <div><strong id="retryCount">0</strong><small>再挑戦</small></div>
+      <div><strong id="knownCount">0</strong><small>覚えた</small></div>
+    </section>
+    <section class="card-wrap">
+      <article id="flashcard" class="flashcard" tabindex="0" role="button" aria-label="暗記カード。タップで英語を表示">
+        <div class="face front">
+          <div class="label">日本語</div>
+          <div id="jaText">読み込み中...</div>
+          <p class="hint">タップして英語を表示</p>
+        </div>
+        <div class="face back">
+          <div class="label">English</div>
+          <div id="enText"></div>
+          <button id="speakBtn" class="speak" type="button">🔊 音声を再生</button>
+          <p class="hint">もう一度タップすると日本語に戻ります</p>
+        </div>
+      </article>
+    </section>
+    <section class="actions" aria-label="カード操作">
+      <button id="prevBtn" type="button">← 前へ</button>
+      <label class="check"><input id="retryCheck" type="checkbox" /> 再度試す</label>
+      <label class="check"><input id="knownCheck" type="checkbox" /> 覚えた</label>
+      <button id="nextBtn" type="button">次へ →</button>
+    </section>
+    <section class="add-panel">
+      <details>
+        <summary>項目を追加・管理する</summary>
+        <form id="addForm" class="add-form">
+          <label>日本語<textarea id="newJa" rows="3" placeholder="例：痛みはありますか？"></textarea></label>
+          <label>英語<textarea id="newEn" rows="3" placeholder="例：Do you have any pain?"></textarea></label>
+          <button type="submit">カードを追加</button>
+        </form>
+        <div class="data-tools">
+          <button id="exportBtn" type="button">追加データを書き出す</button>
+          <label class="file-label">JSONを読み込む<input id="importFile" type="file" accept="application/json" /></label>
+        </div>
+        <p class="note">後から追加したカードだけを書き出せます。別端末でも使いたい場合は、書き出したJSONを読み込んでください。</p>
+      </details>
+    </section>
+    <section class="list-panel">
+      <details>
+        <summary>カード一覧を開く</summary>
+        <input id="searchBox" type="search" placeholder="日本語・英語で検索" />
+        <div id="cardList" class="card-list"></div>
+      </details>
+    </section>
+  </main>
+  <footer>Tokyo Vein Clinic conversation practice</footer>
+
+  <script id="cards-data" type="application/json">
+[
+  {
+    "id": "excel-2",
+    "ja": "こんにちは",
+    "en": "Hello",
+    "sourceRow": 2
+  },
+  {
+    "id": "excel-3",
+    "ja": "院長の近藤と申します。",
+    "en": "My name is Kondo, the clinic director.",
+    "sourceRow": 3
+  },
+  {
+    "id": "excel-4",
+    "ja": "席にお座りください。",
+    "en": "Please have a seat.",
+    "sourceRow": 4
+  },
+  {
+    "id": "excel-5",
+    "ja": "病気について詳しくお話を聞かせてください。",
+    "en": "Please tell me more about your condition.",
+    "sourceRow": 5
+  },
+  {
+    "id": "excel-6",
+    "ja": "どちらの脚になりますか？",
+    "en": "Which leg is it?",
+    "sourceRow": 6
+  },
+  {
+    "id": "excel-7",
+    "ja": "右ですね。",
+    "en": "The right one, I see.",
+    "sourceRow": 7
+  },
+  {
+    "id": "excel-8",
+    "ja": "どのような静脈瘤がありますか？",
+    "en": "What kind of varicose veins do you have?",
+    "sourceRow": 8
+  },
+  {
+    "id": "excel-9",
+    "ja": "症状について聞かせてください。",
+    "en": "Please tell me about your symptoms.",
+    "sourceRow": 9
+  },
+  {
+    "id": "excel-10-1",
+    "ja": "むくみはありますか？",
+    "en": "Do you have any swelling?",
+    "sourceRow": 10
+  },
+  {
+    "id": "excel-10-2",
+    "ja": "左右差はありますか？",
+    "en": "Is there a difference between the left and right sides?",
+    "sourceRow": 10
+  },
+  {
+    "id": "excel-11",
+    "ja": "重さだるさはありますか？",
+    "en": "Do you feel any heaviness or fatigue?",
+    "sourceRow": 11
+  },
+  {
+    "id": "excel-12",
+    "ja": "痛みはどうですか？",
+    "en": "How is the pain?",
+    "sourceRow": 12
+  },
+  {
+    "id": "excel-13",
+    "ja": "かゆみはありますか？",
+    "en": "Do you experience itching?",
+    "sourceRow": 13
+  },
+  {
+    "id": "excel-14",
+    "ja": "足の皮膚の変化はありますか？",
+    "en": "Have you noticed any changes in the skin on your feet?",
+    "sourceRow": 14
+  },
+  {
+    "id": "excel-15",
+    "ja": "脚つれはありますか？",
+    "en": "Do you experience leg cramps?",
+    "sourceRow": 15
+  },
+  {
+    "id": "excel-16",
+    "ja": "それではそれ以外のことを聞かせてください。",
+    "en": "Now, let me ask you about some other things.",
+    "sourceRow": 16
+  },
+  {
+    "id": "excel-17",
+    "ja": "出産歴はありますか？",
+    "en": "Do you have a history of childbirth?",
+    "sourceRow": 17
+  },
+  {
+    "id": "excel-18",
+    "ja": "何回出産されましたか？",
+    "en": "How many times have you given birth?",
+    "sourceRow": 18
+  },
+  {
+    "id": "excel-19-1",
+    "ja": "立ち仕事の時期はありましたか？",
+    "en": "Have you ever had a job that required standing for long periods?",
+    "sourceRow": 19
+  },
+  {
+    "id": "excel-19-2",
+    "ja": "現在はどうですか？",
+    "en": "What about now?",
+    "sourceRow": 19
+  },
+  {
+    "id": "excel-20",
+    "ja": "ご家族に下肢静脈瘤の方はいますか？",
+    "en": "Does anyone in your family have varicose veins?",
+    "sourceRow": 20
+  },
+  {
+    "id": "excel-21",
+    "ja": "なにか一生懸命やっていた運動はありますか？",
+    "en": "Have you ever been actively involved in any sports or exercise?",
+    "sourceRow": 21
+  },
+  {
+    "id": "excel-22",
+    "ja": "他の病気について聞かせてください。",
+    "en": "Please tell me about any other medical conditions you have.",
+    "sourceRow": 22
+  },
+  {
+    "id": "excel-23",
+    "ja": "持病はありますか？",
+    "en": "Do you have any chronic conditions?",
+    "sourceRow": 23
+  },
+  {
+    "id": "excel-24",
+    "ja": "手術は受けたことがありますか？",
+    "en": "Have you ever had surgery?",
+    "sourceRow": 24
+  },
+  {
+    "id": "excel-25",
+    "ja": "どのような手術を受けましたか？",
+    "en": "What kind of surgery did you have?",
+    "sourceRow": 25
+  },
+  {
+    "id": "excel-26",
+    "ja": "アレルギーはありますか？",
+    "en": "Do you have any allergies?",
+    "sourceRow": 26
+  },
+  {
+    "id": "excel-27",
+    "ja": "内服薬について教えてください。",
+    "en": "Please tell me about any medications you are currently taking.",
+    "sourceRow": 27
+  },
+  {
+    "id": "excel-28",
+    "ja": "それでは脚の診察をしましょう。",
+    "en": "Now, let’s examine your leg.",
+    "sourceRow": 28
+  },
+  {
+    "id": "excel-29",
+    "ja": "先ずは、一度私にも足の診察をさせてください。",
+    "en": "First, let me examine your leg.",
+    "sourceRow": 29
+  },
+  {
+    "id": "excel-30",
+    "ja": "脚の超音波検査を行います。",
+    "en": "I’m going to perform an ultrasound on your leg.",
+    "sourceRow": 30
+  },
+  {
+    "id": "excel-31",
+    "ja": "ズボンと靴下を脱いでください。",
+    "en": "Please take off your pants and socks.",
+    "sourceRow": 31
+  },
+  {
+    "id": "excel-32",
+    "ja": "立った状態で検査を行います。",
+    "en": "We’ll perform the exam while you’re standing.",
+    "sourceRow": 32
+  },
+  {
+    "id": "excel-33",
+    "ja": "後ろを向いてください。",
+    "en": "Please turn around.",
+    "sourceRow": 33
+  },
+  {
+    "id": "excel-34",
+    "ja": "それではこちらを向いてください。",
+    "en": "Now, please turn this way.",
+    "sourceRow": 34
+  },
+  {
+    "id": "excel-35",
+    "ja": "これは脚の横断面です。",
+    "en": "This is a cross-section of your leg.",
+    "sourceRow": 35
+  },
+  {
+    "id": "excel-36-1",
+    "ja": "これが皮膚で、その下が皮下脂肪です。",
+    "en": "This is the skin, and beneath it is subcutaneous fat.",
+    "sourceRow": 36
+  },
+  {
+    "id": "excel-36-2",
+    "ja": "ここに見える黒い円が静脈の断面になります。",
+    "en": "The black circles you see here are cross-sections of the veins.",
+    "sourceRow": 36
+  },
+  {
+    "id": "excel-36-3",
+    "ja": "通常の大きさは直径で２−３mm程度です。",
+    "en": "Normally, they are about 2–3 mm in diameter.",
+    "sourceRow": 36
+  },
+  {
+    "id": "excel-36-4",
+    "ja": "これが約１０mm程度まで拡張しています。",
+    "en": "Here, they have dilated to about 10 mm.",
+    "sourceRow": 36
+  },
+  {
+    "id": "excel-37-1",
+    "ja": "足の付け根まで見ていきましょう。",
+    "en": "Let’s take a look all the way up to the groin.",
+    "sourceRow": 37
+  },
+  {
+    "id": "excel-37-2",
+    "ja": "原因は個々の足の付け根にあります。",
+    "en": "The cause lies in the individual veins at the groin.",
+    "sourceRow": 37
+  },
+  {
+    "id": "excel-37-3",
+    "ja": "ここからこの静脈内を血液が下に向かって逆流しています。",
+    "en": "From here, blood is flowing backward downward inside this vein.",
+    "sourceRow": 37
+  },
+  {
+    "id": "excel-37-4",
+    "ja": "それが原因で下腿部の静脈が膨れて静脈瘤になっています。",
+    "en": "This causes the veins in the lower leg to swell, resulting in varicose veins.",
+    "sourceRow": 37
+  },
+  {
+    "id": "excel-37-5",
+    "ja": "理由は静脈内の静脈弁が壊れたことで下に向かって流れ始めているからです。",
+    "en": "The reason is that the valves inside the vein have failed, allowing blood to flow downward.",
+    "sourceRow": 37
+  },
+  {
+    "id": "excel-38",
+    "ja": "検査はこれで終了です。",
+    "en": "That concludes the examination.",
+    "sourceRow": 38
+  },
+  {
+    "id": "excel-39",
+    "ja": "ズボンを履いてください。",
+    "en": "Please put your pants back on.",
+    "sourceRow": 39
+  },
+  {
+    "id": "excel-40",
+    "ja": "静脈瘤について説明します。",
+    "en": "I’ll explain varicose veins.",
+    "sourceRow": 40
+  },
+  {
+    "id": "excel-41",
+    "ja": "今回は足の付け根から悪くなる大きなタイプの静脈瘤です。",
+    "en": "This is a major type of varicose vein that originates in the groin area.",
+    "sourceRow": 41
+  },
+  {
+    "id": "excel-42",
+    "ja": "この病気は急に悪化したり、命に関わるようなことはありません。",
+    "en": "This condition does not worsen suddenly, nor is it life-threatening.",
+    "sourceRow": 42
+  },
+  {
+    "id": "excel-43-1",
+    "ja": "ただ自然に治ることもありません。",
+    "en": "However, it does not resolve on its own.",
+    "sourceRow": 43
+  },
+  {
+    "id": "excel-43-2",
+    "ja": "徐々に進行していきます。",
+    "en": "It progresses gradually.",
+    "sourceRow": 43
+  },
+  {
+    "id": "excel-44",
+    "ja": "治療は２種類です。",
+    "en": "There are two types of treatment.",
+    "sourceRow": 44
+  },
+  {
+    "id": "excel-45-1",
+    "ja": "一つ目は、弾性ストッキング着用による保存的な治療です。",
+    "en": "The first is conservative treatment involving the use of compression stockings.",
+    "sourceRow": 45
+  },
+  {
+    "id": "excel-45-2",
+    "ja": "これのメリットは、履くだけで症状がすることです。",
+    "en": "The advantage of this is that symptoms improve simply by wearing them.",
+    "sourceRow": 45
+  },
+  {
+    "id": "excel-45-3",
+    "ja": "デメリットは、これで静脈瘤がなくなるわけではなく、あくまで対処療法ということです。",
+    "en": "The disadvantage is that it does not eliminate the varicose veins; it is strictly a symptomatic treatment.",
+    "sourceRow": 45
+  },
+  {
+    "id": "excel-46",
+    "ja": "２つ目は、手術という方法になります。カテーテルを使った焼灼術です。２０分程度で終了する日帰り手術です。",
+    "en": "The second option is surgery: endovenous laser ablation using a catheter. It is an outpatient procedure that takes about 20 minutes.",
+    "sourceRow": 46
+  },
+  {
+    "id": "excel-47",
+    "ja": "どちらを希望されますか？",
+    "en": "Which option would you prefer?",
+    "sourceRow": 47
+  },
+  {
+    "id": "excel-48-1",
+    "ja": "手術を受ける場合は、術前の検査を受けてもらいます。",
+    "en": "If you choose to have surgery, you will need to undergo preoperative testing.",
+    "sourceRow": 48
+  },
+  {
+    "id": "excel-48-2",
+    "ja": "後日検査に来てもらい、心電図、採血の検査を受けてもらいます。",
+    "en": "Please come in for an appointment at a later date to have an electrocardiogram and blood tests.",
+    "sourceRow": 48
+  },
+  {
+    "id": "excel-48-3",
+    "ja": "またそのときに手術について詳しく説明させていただきます。",
+    "en": "At that time, we will also provide a detailed explanation of the procedure.",
+    "sourceRow": 48
+  },
+  {
+    "id": "excel-49-1",
+    "ja": "ストッキングは、後で看護師と一緒にフィッティングをしましょう。",
+    "en": "As for the compression stockings, we’ll have you try them on with a nurse later.",
+    "sourceRow": 49
+  },
+  {
+    "id": "excel-49-2",
+    "ja": "彼女たちは段sネイストッキングの専門家なのでよく相談してください。",
+    "en": "They are experts in compression stockings, so please feel free to consult with them.",
+    "sourceRow": 49
+  },
+  {
+    "id": "excel-50",
+    "ja": "それでは検査の日、手術の日を看護師さんと一緒に決めてください。",
+    "en": "Please work with the nurse to schedule the date for your tests and the surgery.",
+    "sourceRow": 50
+  },
+  {
+    "id": "excel-51",
+    "ja": "静脈瘤の手術について説明していきます。",
+    "en": "I will now explain the varicose vein surgery.",
+    "sourceRow": 51
+  },
+  {
+    "id": "excel-52",
+    "ja": "先ずは受けてもらった検査について見ていきます。",
+    "en": "First, let’s review the test results you received.",
+    "sourceRow": 52
+  },
+  {
+    "id": "excel-53",
+    "ja": "こちらが心電図になりますが特に問題ありません。",
+    "en": "This is your ECG; there are no particular issues.",
+    "sourceRow": 53
+  },
+  {
+    "id": "excel-54",
+    "ja": "これが、採血データの結果です。",
+    "en": "Here are the results of your blood tests.",
+    "sourceRow": 54
+  },
+  {
+    "id": "excel-55",
+    "ja": "こちらも特に問題ありません。",
+    "en": "There are no particular issues here either.",
+    "sourceRow": 55
+  },
+  {
+    "id": "excel-56",
+    "ja": "次に静脈瘤について説明します。",
+    "en": "Next, I’ll explain varicose veins.",
+    "sourceRow": 56
+  },
+  {
+    "id": "excel-57",
+    "ja": "こちらの絵を使って説明します。",
+    "en": "I’ll use this diagram to explain.",
+    "sourceRow": 57
+  },
+  {
+    "id": "excel-58",
+    "ja": "脚の静脈は2種類あります。",
+    "en": "There are two types of veins in the legs.",
+    "sourceRow": 58
+  },
+  {
+    "id": "excel-59",
+    "ja": "一つ目は脚の奥を流れる静脈です。",
+    "en": "The first type runs deep within the leg.",
+    "sourceRow": 59
+  },
+  {
+    "id": "excel-60",
+    "ja": "深部静脈と言います。",
+    "en": "These are called deep veins.",
+    "sourceRow": 60
+  },
+  {
+    "id": "excel-61",
+    "ja": "直径で２ｃｍある、太い静脈です。",
+    "en": "They are thick veins with a diameter of about 2 cm.",
+    "sourceRow": 61
+  },
+  {
+    "id": "excel-62",
+    "ja": "この中を上に向かって血液が流れます。",
+    "en": "Blood flows upward through these veins.",
+    "sourceRow": 62
+  },
+  {
+    "id": "excel-63",
+    "ja": "この血管は特に問題なく、良く血液は流れています。",
+    "en": "These veins function normally, and blood flows through them smoothly.",
+    "sourceRow": 63
+  },
+  {
+    "id": "excel-64",
+    "ja": "もう一つは、足の表面を流れる静脈です。",
+    "en": "The other is the veins that run along the surface of the leg.",
+    "sourceRow": 64
+  },
+  {
+    "id": "excel-65",
+    "ja": "細い静脈ですが、沢山存在しています。",
+    "en": "They are thin veins, but there are many of them.",
+    "sourceRow": 65
+  },
+  {
+    "id": "excel-66",
+    "ja": "その中で、一番代表的な静脈がこれになります。",
+    "en": "Among them, this is the most representative vein.",
+    "sourceRow": 66
+  },
+  {
+    "id": "excel-67",
+    "ja": "名前は大伏在静脈と言われています。",
+    "en": "It is called the great saphenous vein.",
+    "sourceRow": 67
+  },
+  {
+    "id": "excel-68",
+    "ja": "表面の静脈の中で一番大きな静脈です。",
+    "en": "It is the largest of the superficial veins.",
+    "sourceRow": 68
+  },
+  {
+    "id": "excel-69",
+    "ja": "ただ、直径で約２mmの血管です。",
+    "en": "However, it is a blood vessel with a diameter of about 2 mm.",
+    "sourceRow": 69
+  },
+  {
+    "id": "excel-70",
+    "ja": "この中を血液は上に向かって流れています。",
+    "en": "Blood flows upward through this vein.",
+    "sourceRow": 70
+  },
+  {
+    "id": "excel-71",
+    "ja": "前回は、この静脈の弁が壊れ、血液が逆流したため、",
+    "en": "Last time, the valves in this vein failed, causing blood to flow backward,",
+    "sourceRow": 71
+  },
+  {
+    "id": "excel-72",
+    "ja": "この静脈が太くなり、周りに静脈瘤賀出てきたのです。",
+    "en": "causing the vein to enlarge and varicose veins to appear around it.",
+    "sourceRow": 72
+  },
+  {
+    "id": "excel-73",
+    "ja": "前回の手術では、この大伏在静脈の抜去術を行っています。",
+    "en": "In the previous surgery, we performed a saphenectomy to remove this great saphenous vein.",
+    "sourceRow": 73
+  },
+  {
+    "id": "excel-74",
+    "ja": "残念ながら、今回はその場所から再発が起きてしまいました。",
+    "en": "Unfortunately, a recurrence has occurred at that same site this time.",
+    "sourceRow": 74
+  },
+  {
+    "id": "excel-75",
+    "ja": "今回は足のつけ根近くの大伏在静脈の枝の静脈の弁が壊れ、逆流が起きて",
+    "en": "This time, the valves in a branch of the great saphenous vein near the groin failed, causing reflux",
+    "sourceRow": 75
+  },
+  {
+    "id": "excel-76",
+    "ja": "静脈が拡張してしまいました。",
+    "en": "causing the vein to dilate.",
+    "sourceRow": 76
+  },
+  {
+    "id": "excel-77",
+    "ja": "手術では、この拡張した静脈をレーザーで焼灼し閉塞させます。",
+    "en": "During the surgery, we will use a laser to cauterize and close off this dilated vein.",
+    "sourceRow": 77
+  },
+  {
+    "id": "excel-78",
+    "ja": "また残りの静脈瘤は硬化療法を行います。",
+    "en": "We will also perform sclerotherapy on the remaining varicose veins.",
+    "sourceRow": 78
+  },
+  {
+    "id": "excel-79",
+    "ja": "硬化療法は注射で行う治療です。",
+    "en": "Sclerotherapy is a treatment performed by injection.",
+    "sourceRow": 79
+  },
+  {
+    "id": "excel-80",
+    "ja": "レーザーで焼灼した静脈は徐々に吸収されて、一年ほどで消失します。",
+    "en": "The vein treated with laser ablation will gradually be reabsorbed and disappear within about a year.",
+    "sourceRow": 80
+  },
+  {
+    "id": "excel-81",
+    "ja": "残った静脈瘤は3か月後をめどに、硬化療法で治療します。",
+    "en": "The remaining varicose veins will be treated with sclerotherapy, typically around three months later.",
+    "sourceRow": 81
+  },
+  {
+    "id": "excel-82-1",
+    "ja": "手術は局所麻酔で行います。",
+    "en": "The procedure is performed under local anesthesia.",
+    "sourceRow": 82
+  },
+  {
+    "id": "excel-82-2",
+    "ja": "手術の間は少し眠ってもらいます。",
+    "en": "You will be put to sleep briefly during the procedure.",
+    "sourceRow": 82
+  },
+  {
+    "id": "excel-83-1",
+    "ja": "手術時間は約20分です。",
+    "en": "The procedure takes about 20 minutes.",
+    "sourceRow": 83
+  },
+  {
+    "id": "excel-83-2",
+    "ja": "終わればすぐ歩けます。",
+    "en": "You will be able to walk immediately afterward.",
+    "sourceRow": 83
+  },
+  {
+    "id": "excel-83-3",
+    "ja": "痛みも特にありません。",
+    "en": "There is no significant pain.",
+    "sourceRow": 83
+  },
+  {
+    "id": "excel-84",
+    "ja": "翌日からは、大腿部で突っ張る感じや、圧迫痛が少しあります。",
+    "en": "Starting the next day, you may experience a slight tightness or tenderness in the thigh.",
+    "sourceRow": 84
+  },
+  {
+    "id": "excel-85-1",
+    "ja": "合併症についてお話します。",
+    "en": "Now, let me discuss complications.",
+    "sourceRow": 85
+  },
+  {
+    "id": "excel-85-2",
+    "ja": "出血、創感染はめったにありません。",
+    "en": "Bleeding and wound infections are very rare.",
+    "sourceRow": 85
+  },
+  {
+    "id": "excel-85-3",
+    "ja": "内出血が時々ありますが、一週間ほどで、消えていきます。",
+    "en": "Bruising occasionally occurs, but it usually disappears within about a week.",
+    "sourceRow": 85
+  },
+  {
+    "id": "excel-85-4",
+    "ja": "血栓性静脈炎がまれに起きますが、これも自然に解消します。",
+    "en": "Thrombophlebitis rarely occurs, but it also resolves on its own.",
+    "sourceRow": 85
+  },
+  {
+    "id": "excel-85-5",
+    "ja": "神経障害、アレルギーはめったにありません。",
+    "en": "Nerve damage and allergic reactions are very rare.",
+    "sourceRow": 85
+  },
+  {
+    "id": "excel-86",
+    "ja": "私の話はここまでです。",
+    "en": "That concludes my explanation.",
+    "sourceRow": 86
+  },
+  {
+    "id": "excel-87",
+    "ja": "何か質問はありますか？",
+    "en": "Do you have any questions?",
+    "sourceRow": 87
+  },
+  {
+    "id": "excel-88",
+    "ja": "これは同意書になります。",
+    "en": "This is the consent form.",
+    "sourceRow": 88
+  },
+  {
+    "id": "excel-89",
+    "ja": "ここにサインをして、手術の当日に持ってきてください。",
+    "en": "Please sign here and bring it with you on the day of the surgery.",
+    "sourceRow": 89
+  }
+]
+  </script>
+  <script>
+    const STORAGE_KEY = 'medicalFlashcards.custom.v2';
+    const STATE_KEY = 'medicalFlashcards.state.v2';
+    const $ = id => document.getElementById(id);
+
+    let baseCards = [];
+    let cards = [];
+    let view = [];
+    let index = 0;
+    let flipped = false;
+    let mode = 'all';
+    let state = {};
+
+    function loadBaseCards() {
+      try {
+        const raw = $('cards-data').textContent;
+        const parsed = JSON.parse(raw);
+        baseCards = parsed.map(c => ({ ...c, custom: false }));
+      } catch (e) {
+        console.error(e);
+        baseCards = [];
+        $('jaText').textContent = 'カードデータの読み込みに失敗しました。';
+      }
+    }
+    function loadCustom() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+    }
+    function saveCustom(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+    function loadState() {
+      try { state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); } catch { state = {}; }
+    }
+    function saveState() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+    function rebuildCards() {
+      cards = [...baseCards, ...loadCustom().map(c => ({ ...c, custom: true }))];
+      applyMode(false);
+    }
+    function applyMode(resetIndex = true) {
+      view = mode === 'retry' ? cards.filter(c => state[c.id]?.retry) : [...cards];
+      if (!view.length && cards.length) view = [...cards];
+      if (resetIndex || index >= view.length) index = 0;
+    }
+    function current() { return view[index] || null; }
+    function render() {
+      const c = current();
+      flipped = false;
+      $('flashcard').classList.remove('flipped');
+      $('allMode').classList.toggle('active', mode === 'all');
+      $('retryMode').classList.toggle('active', mode === 'retry');
+      $('cardTotal').textContent = cards.length;
+      $('totalNo').textContent = view.length;
+      $('currentNo').textContent = view.length ? index + 1 : 0;
+      $('retryCount').textContent = cards.filter(x => state[x.id]?.retry).length;
+      $('knownCount').textContent = cards.filter(x => state[x.id]?.known).length;
+      if (!c) {
+        $('jaText').textContent = 'カードが登録されていません。';
+        $('enText').textContent = '';
+        $('retryCheck').checked = false;
+        $('knownCheck').checked = false;
+        return;
+      }
+      $('jaText').textContent = c.ja;
+      $('enText').textContent = c.en;
+      $('retryCheck').checked = !!state[c.id]?.retry;
+      $('knownCheck').checked = !!state[c.id]?.known;
+      renderList();
+    }
+    function speakEnglish(text) {
+      if (!('speechSynthesis' in window)) { alert('このブラウザは音声読み上げに対応していません。'); return; }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.78;
+      u.pitch = 1;
+      window.speechSynthesis.speak(u);
+    }
+    function flip() {
+      const c = current();
+      if (!c) return;
+      flipped = !flipped;
+      $('flashcard').classList.toggle('flipped', flipped);
+      if (flipped) setTimeout(() => speakEnglish(c.en), 120);
+    }
+    function go(delta) {
+      if (!view.length) return;
+      index = (index + delta + view.length) % view.length;
+      render();
+    }
+    function setFlag(flag, value) {
+      const c = current();
+      if (!c) return;
+      state[c.id] = { ...(state[c.id] || {}), [flag]: value };
+      saveState();
+      applyMode(false);
+      if (mode === 'retry' && !value && flag === 'retry') index = Math.min(index, Math.max(view.length - 1, 0));
+      render();
+    }
+    function shuffle() {
+      for (let i = view.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [view[i], view[j]] = [view[j], view[i]];
+      }
+      index = 0;
+      render();
+    }
+    function addCard(ja, en) {
+      const custom = loadCustom();
+      const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      custom.push({ id, ja, en });
+      saveCustom(custom);
+      rebuildCards();
+      index = view.findIndex(c => c.id === id);
+      if (index < 0) index = 0;
+      render();
+    }
+    function exportCustom() {
+      const data = JSON.stringify(loadCustom(), null, 2);
+      const blob = new Blob([data], { type: 'application/json;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '診察英会話_追加カード.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function renderList() {
+      const box = $('cardList');
+      if (!box) return;
+      const q = ($('searchBox').value || '').trim().toLowerCase();
+      const filtered = cards.filter(c => (c.ja + ' ' + c.en).toLowerCase().includes(q));
+      box.innerHTML = '';
+      if (!filtered.length) { box.innerHTML = '<div class="empty">該当するカードがありません。</div>'; return; }
+      filtered.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<p><strong>日本語</strong><br>${escapeHtml(c.ja)}</p><p><strong>English</strong><br>${escapeHtml(c.en)}</p><button type="button">開く</button>`;
+        row.querySelector('button').onclick = () => {
+          mode = 'all';
+          applyMode(false);
+          index = view.findIndex(x => x.id === c.id);
+          if (index < 0) index = 0;
+          render();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        box.appendChild(row);
+      });
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    }
+
+    $('flashcard').addEventListener('click', flip);
+    $('flashcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    $('speakBtn').addEventListener('click', e => { e.stopPropagation(); const c = current(); if (c) speakEnglish(c.en); });
+    $('prevBtn').addEventListener('click', () => go(-1));
+    $('nextBtn').addEventListener('click', () => go(1));
+    $('retryCheck').addEventListener('change', e => setFlag('retry', e.target.checked));
+    $('knownCheck').addEventListener('change', e => setFlag('known', e.target.checked));
+    $('allMode').addEventListener('click', () => { mode = 'all'; applyMode(); render(); });
+    $('retryMode').addEventListener('click', () => { mode = 'retry'; applyMode(); render(); });
+    $('shuffleBtn').addEventListener('click', shuffle);
+    $('resetBtn').addEventListener('click', () => { if (confirm('進捗チェックをリセットしますか？')) { state = {}; saveState(); applyMode(); render(); } });
+    $('addForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const ja = $('newJa').value.trim();
+      const en = $('newEn').value.trim();
+      if (!ja || !en) { alert('日本語と英語を両方入力してください。'); return; }
+      addCard(ja, en);
+      $('newJa').value = '';
+      $('newEn').value = '';
+    });
+    $('exportBtn').addEventListener('click', exportCustom);
+    $('importFile').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!Array.isArray(imported)) throw new Error('not array');
+        const existing = loadCustom();
+        const normalized = imported.filter(x => x.ja && x.en).map(x => ({ id: x.id || ('custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)), ja: x.ja, en: x.en }));
+        saveCustom([...existing, ...normalized]);
+        rebuildCards();
+        render();
+        alert(normalized.length + '件のカードを読み込みました。');
+      } catch (err) { alert('JSONを読み込めませんでした。'); }
+      e.target.value = '';
+    });
+    $('searchBox').addEventListener('input', renderList);
+
+    loadBaseCards();
+    loadState();
+    rebuildCards();
+    render();
+  </script>
+</body>
+</html>
